@@ -8,6 +8,7 @@ import {
   Calendar,
   Clock3,
 } from "lucide-react";
+import API_BASE_URL from "@/lib/api";
 
 export default function SummaryDashboard() {
   const [summary, setSummary] = useState("");
@@ -22,7 +23,7 @@ export default function SummaryDashboard() {
     setActiveType(type);
 
     try {
-      const res = await fetch(`http://localhost:5285/api/Summary/${type}`, {
+      const res = await fetch(`${API_BASE_URL}/api/Summary/${type}`, {
         method: "POST",
       });
 

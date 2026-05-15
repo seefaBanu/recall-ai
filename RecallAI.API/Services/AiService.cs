@@ -1,17 +1,72 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 
 namespace RecallAI.API.Services;
 
 public class AiService
 {
     private readonly HttpClient _httpClient;
+    private readonly IConfiguration _config;
 
-    public AiService(HttpClient httpClient)
+    public AiService(HttpClient httpClient, IConfiguration config)
     {
         _httpClient = httpClient;
-        _httpClient.Timeout = TimeSpan.FromMinutes(5); // IMPORTANT FIX
+        _config = config;
+        _httpClient.Timeout = TimeSpan.FromMinutes(5);
     }
 
+    // =========================
+    // CORE GROQ CALL
+    // =========================
+    private async Task<string> CallGroq(string prompt)
+    {
+        var apiKey = _config["Groq:ApiKey"];
+
+        var requestBody = new
+        {
+            model = "llama3-8b-8192",
+            messages = new[]
+            {
+                new { role = "system", content = "You are a helpful productivity assistant." },
+                new { role = "user", content = prompt }
+            },
+            temperature = 0.7
+        };
+
+        var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            "https://api.groq.com/openai/v1/chat/completions"
+        );
+
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer", apiKey);
+
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _httpClient.SendAsync(request);
+        var json = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception(json);
+
+        using var doc = JsonDocument.Parse(json);
+
+        return doc.RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content")
+            .GetString() ?? "";
+    }
+
+    // =========================
+    // GENERAL SUMMARY
+    // =========================
     public async Task<string> GenerateSummary(string type, List<string> notes)
     {
         var combined = string.Join("\n", notes);
@@ -24,7 +79,6 @@ Write a SINGLE clean paragraph summary.
 Rules:
 - Do NOT use bullet points
 - Do NOT use headings
-- Do NOT format text
 - Only 1 paragraph
 - Keep it natural and readable
 
@@ -34,75 +88,47 @@ User Notes:
 {combined}
 ";
 
-        var response = await _httpClient.PostAsJsonAsync(
-            "http://localhost:11434/api/generate",
-            new
-            {
-                model = "llama3",
-                prompt = prompt,
-                stream = false
-            });
-
-        var result = await response.Content.ReadFromJsonAsync<OllamaResponse>();
-
-        return result?.response ?? "";
+        return await CallGroq(prompt);
     }
 
+    // =========================
+    // DAILY SUMMARY
+    // =========================
     public async Task<string> GenerateDailySummary(List<string> notes)
     {
-
-        var trimmedNotes = notes
-            .TakeLast(20)
-            .ToList();
+        var trimmedNotes = notes.TakeLast(20);
         var combinedNotes = string.Join("\n", trimmedNotes);
+
         var prompt = $@"
-                You are an AI productivity assistant.
+You are an AI productivity assistant.
 
-                Generate a DAILY SUMMARY in a STRICT FORMAT.
+Generate a DAILY SUMMARY in STRICT FORMAT.
 
-                RULES:
-                - Do NOT write long paragraphs
-                - Do NOT repeat information
-                - Use bullet points only
-                - Keep it short and structured
-                - Use clear headings
+RULES:
+- Keep it short
+- Use structured sections
+- Use bullet points only where needed
 
-                FORMAT:
+FORMAT:
 
-                📅 Daily Summary
+Daily Summary
 
-                🎯 Overview
-                (1-2 lines max)
+Overview
+(1-2 lines max)
 
-                ✅ Key Activities
-                - bullet points
+Key Activities
+- bullet points
 
-                📊 Outcome
-                (1-2 lines max)
+Outcome
+(1-2 lines max)
 
-                📌 Next Steps
-                - bullet points
+Next Steps
+- bullet points
 
-                USER NOTES:
-                {combinedNotes}
-                ";
+USER NOTES:
+{combinedNotes}
+";
 
-        var response = await _httpClient.PostAsJsonAsync(
-            "http://localhost:11434/api/generate",
-            new
-            {
-                model = "llama3",
-                prompt = prompt,
-                stream = false
-            });
-
-        var result = await response.Content.ReadFromJsonAsync<OllamaResponse>();
-
-        return result?.response ?? "No summary generated";
+        return await CallGroq(prompt);
     }
-}
-
-public class OllamaResponse
-{
-    public string response { get; set; }
 }
