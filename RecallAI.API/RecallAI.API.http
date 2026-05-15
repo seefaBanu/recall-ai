@@ -1,0 +1,6 @@
+@RecallAI.API_HostAddress = http://localhost:5285
+
+GET {{RecallAI.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
