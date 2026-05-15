@@ -35,6 +35,8 @@ public class AiService
             temperature = 0.7
         };
 
+        //test
+
         var request = new HttpRequestMessage(
             HttpMethod.Post,
             "https://api.groq.com/openai/v1/chat/completions"
