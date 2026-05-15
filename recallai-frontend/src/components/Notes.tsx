@@ -1,20 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Pencil,
-  Trash2,
-  Check,
-  X,
-  Plus,
-  Sparkles,
-} from "lucide-react";
+import { Pencil, Trash2, Check, X, Plus, Sparkles } from "lucide-react";
 
 interface Note {
   id: number;
   title: string;
   content: string;
 }
+import API_BASE_URL from "@/lib/api";
 
 export default function Notes() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -29,7 +23,7 @@ export default function Notes() {
 
   async function fetchNotes() {
     try {
-      const res = await fetch("http://localhost:5285/api/Notes");
+      const res = await fetch(`${API_BASE_URL}/api/Notes`);
       const data = await res.json();
       setNotes(data);
     } catch (err) {
@@ -47,7 +41,7 @@ export default function Notes() {
     setLoading(true);
 
     try {
-      await fetch("http://localhost:5285/api/Notes", {
+      await fetch(`${API_BASE_URL}/api/Notes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content }),
@@ -62,7 +56,7 @@ export default function Notes() {
   }
 
   async function deleteNote(id: number) {
-    await fetch(`http://localhost:5285/api/Notes/${id}`, {
+    await fetch(`${API_BASE_URL}/api/Notes/${id}`, {
       method: "DELETE",
     });
 
@@ -105,9 +99,7 @@ export default function Notes() {
       <div>
         <div className="flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-amber-500" />
-          <h2 className="text-3xl font-bold text-gray-900">
-            Smart Notes
-          </h2>
+          <h2 className="text-3xl font-bold text-gray-900">Smart Notes</h2>
         </div>
 
         <p className="text-gray-500 mt-1">
@@ -247,9 +239,7 @@ export default function Notes() {
                     {note.title}
                   </h3>
 
-                  <p className="text-gray-600 mt-2">
-                    {note.content}
-                  </p>
+                  <p className="text-gray-600 mt-2">{note.content}</p>
                 </div>
 
                 <div className="flex gap-3 mt-5">
