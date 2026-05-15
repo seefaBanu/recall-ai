@@ -26,7 +26,7 @@ public class AiService
 
         var requestBody = new
         {
-            model = "llama3-8b-8192",
+            model = "openai/gpt-oss-120b",
             messages = new[]
             {
                 new { role = "system", content = "You are a helpful productivity assistant." },
