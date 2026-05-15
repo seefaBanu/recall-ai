@@ -4,44 +4,62 @@ using RecallAI.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+//
+// CORS (Production + Local)
+//
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
+            policy.AllowAnyOrigin()
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
 });
 
-
-// Add services
+//
+// Controllers + Swagger
+//
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//
+// AI Service
+//
 builder.Services.AddHttpClient<AiService>();
 
+//
+// Database
+//
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-// Configure middleware
+//
+// Swagger (optional for production)
+//
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+//
+// Railway PORT BINDING FIX
+//
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Urls.Add($"http://0.0.0.0:{port}");
+
+//
+// Middleware pipeline
+//
 app.UseHttpsRedirection();
+
 app.UseCors("AllowFrontend");
 
-// THIS IS IMPORTANT
 app.MapControllers();
 
 app.Run();
