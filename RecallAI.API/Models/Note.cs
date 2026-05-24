@@ -1,9 +1,12 @@
 namespace RecallAI.API.Models;
+
 using System.ComponentModel.DataAnnotations;
 
 public class Note
 {
     public int Id { get; set; }
+
+    public string UserId { get; set; } = "";
 
     [Required(ErrorMessage = "Title is required")]
     public string Title { get; set; } = "";

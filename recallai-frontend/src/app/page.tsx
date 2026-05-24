@@ -1,14 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import Layout from "@/components/Layout";
 import NotesList from "@/components/NotesList";
 import NoteEditor from "@/components/NoteEditor";
 import SummaryPanel from "@/components/SummaryPanel";
 
 export default function Home() {
+  const { data: session, status } = useSession();
+
   const [activeNoteId, setActiveNoteId] = useState<any>(null);
   const [aiOpen, setAiOpen] = useState(false);
+
+  // LOADING SESSION
+  if (status === "loading") {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  // NOT LOGGED IN
+  if (!session) {
+    redirect("/login");
+  }
 
   return (
     <Layout>
@@ -21,7 +40,7 @@ export default function Home() {
           />
         </div>
 
-        {/* MIDDLE (DYNAMIC WIDTH) */}
+        {/* MIDDLE */}
         <div
           className={`
             overflow-y-auto px-4 transition-all duration-300
@@ -31,12 +50,15 @@ export default function Home() {
           <NoteEditor activeNoteId={activeNoteId} />
         </div>
 
-        {/* RIGHT AI PANEL (DYNAMIC WIDTH) */}
+        {/* RIGHT */}
         <div
           className={`
-            overflow-y-auto border-l border-gray-200 pl-3
-            transition-all duration-300
-            ${aiOpen ? "col-span-3" : "col-span-1"}
+            overflow-y-auto transition-all duration-300
+            ${
+              aiOpen
+                ? "col-span-3 border-l border-gray-200 pl-3"
+                : "col-span-1 flex justify-center"
+            }
           `}
         >
           <SummaryPanel

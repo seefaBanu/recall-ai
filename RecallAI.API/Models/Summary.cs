@@ -4,7 +4,7 @@ public class Summary
 {
     public int Id { get; set; }
 
-    public string Type { get; set; } = ""; 
+    public string Type { get; set; } = "";
     // Daily | Weekly | Monthly | Yearly
 
     public string Content { get; set; } = "";
@@ -14,4 +14,5 @@ public class Summary
     public DateTime ToDate { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string UserId { get; set; } = "";
 }

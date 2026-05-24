@@ -14,6 +14,11 @@ public class AiController : ControllerBase
         _aiService = aiService;
     }
 
+    private string GetUserId()
+    {
+        return Request.Headers["x-user-id"].ToString();
+    }
+
     public class AiRequest
     {
         public string Text { get; set; } = "";
@@ -22,7 +27,16 @@ public class AiController : ControllerBase
     [HttpPost("summary")]
     public async Task<IActionResult> GetSummary([FromBody] AiRequest request)
     {
-        var result = await _aiService.GenerateSummary("daily", new List<string> { request.Text });
+        var userId = GetUserId();
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("Missing user id");
+
+        var result = await _aiService.GenerateSummary(
+            "daily",
+            new List<string> { request.Text }
+        );
+
         return Ok(result);
     }
 }

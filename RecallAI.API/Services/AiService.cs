@@ -74,21 +74,28 @@ public class AiService
         var combined = string.Join("\n", notes);
 
         var prompt = $@"
-You are an AI productivity assistant.
+            You are an AI note summarizer.
 
-Write a SINGLE clean paragraph summary.
+            TASK:
+            Create a VERY SHORT summary of the user's notes.
 
-Rules:
-- Do NOT use bullet points
-- Do NOT use headings
-- Only 1 paragraph
-- Keep it natural and readable
+            RULES:
+            - Maximum 4–6 lines total
+            - Use simple language
+            - No long explanations
+            - No storytelling
+            - No technical deep dive
+            - No bullet points unless absolutely necessary
+            - Focus only on key idea
 
-Type: {type}
+            FORMAT:
+            - 1 short paragraph OR 3–5 short bullet points max
 
-User Notes:
-{combined}
-";
+            TYPE: {type}
+
+            NOTES:
+            {combined}
+            ";
 
         return await CallGroq(prompt);
     }
@@ -98,38 +105,30 @@ User Notes:
     // =========================
     public async Task<string> GenerateDailySummary(List<string> notes)
     {
-        var trimmedNotes = notes.TakeLast(20);
-        var combinedNotes = string.Join("\n", trimmedNotes);
+        var trimmedNotes = notes.TakeLast(15);
+        var combined = string.Join("\n", trimmedNotes);
 
         var prompt = $@"
-You are an AI productivity assistant.
+            You are an AI productivity assistant.
 
-Generate a DAILY SUMMARY in STRICT FORMAT.
+            TASK:
+            Summarize today's notes in a SHORT and CLEAN format.
 
-RULES:
-- Keep it short
-- Use structured sections
-- Use bullet points only where needed
+            RULES:
+            - Max 5 lines total
+            - Keep it extremely simple
+            - No paragraphs longer than 1–2 lines
+            - No technical explanations
+            - No repetition
+            - Focus only on what matters
 
-FORMAT:
+            FORMAT:
+            Daily Summary:
+            - 3 to 5 short bullet points MAX
 
-Daily Summary
-
-Overview
-(1-2 lines max)
-
-Key Activities
-- bullet points
-
-Outcome
-(1-2 lines max)
-
-Next Steps
-- bullet points
-
-USER NOTES:
-{combinedNotes}
-";
+            NOTES:
+            {combined}
+            ";
 
         return await CallGroq(prompt);
     }

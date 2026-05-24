@@ -12,4 +12,6 @@ public class AppDbContext : DbContext
 
     public DbSet<Note> Notes => Set<Note>();
     public DbSet<Summary> Summaries => Set<Summary>();
+
+    public DbSet<User> Users => Set<User>();
 }

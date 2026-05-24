@@ -3,14 +3,38 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import API_BASE_URL from "@/lib/api";
+import { useSession } from "next-auth/react";
 
 export default function NotesList({ activeNoteId, setActiveNoteId }: any) {
+  const { data: session, status } = useSession();
   const [notes, setNotes] = useState<any[]>([]);
 
+  // =========================
+  // FETCH NOTES (SAFE)
+  // =========================
   async function fetchNotes() {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/Notes`);
-      const data = await res.json();
+      if (!session?.accessToken) return;
+
+      const res = await fetch(`${API_BASE_URL}/api/Notes`, {
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        console.warn("Failed to fetch notes:", res.status);
+        setNotes([]);
+        return;
+      }
+
+      const text = await res.text();
+      if (!text) {
+        setNotes([]);
+        return;
+      }
+
+      const data = JSON.parse(text);
 
       const sorted = data.sort(
         (a: any, b: any) =>
@@ -23,20 +47,33 @@ export default function NotesList({ activeNoteId, setActiveNoteId }: any) {
     }
   }
 
+  // =========================
+  // LOAD WHEN AUTH READY
+  // =========================
   useEffect(() => {
-    fetchNotes();
+    if (status === "authenticated") {
+      fetchNotes();
+    }
+  }, [status]);
 
+  // reload event (after save)
+  useEffect(() => {
     const handler = () => fetchNotes();
+
     window.addEventListener("notes-updated", handler);
-
     return () => window.removeEventListener("notes-updated", handler);
-  }, []);
+  }, [session]);
 
-  // CREATE DRAFT ONLY (NO API CALL)
+  // =========================
+  // CREATE DRAFT (NO API CALL)
+  // =========================
   function createNote() {
     setActiveNoteId("draft");
   }
 
+  // =========================
+  // GROUPING
+  // =========================
   const groupedNotes = useMemo(() => {
     const today: any[] = [];
     const last7Days: any[] = [];
@@ -68,6 +105,9 @@ export default function NotesList({ activeNoteId, setActiveNoteId }: any) {
     return { today, last7Days, monthly };
   }, [notes]);
 
+  // =========================
+  // UI
+  // =========================
   function renderNotes(list: any[]) {
     return list.map((n) => (
       <div

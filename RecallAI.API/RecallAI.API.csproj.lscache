@@ -55,6 +55,7 @@ TemporaryDependencyNodeTargetIdentifier=net8.0
 [sourceFiles]
 Controllers/
  AiController.cs
+ AuthController.cs
  NotesController.cs
  SummaryController.cs
 Data/AppDbContext.cs
@@ -65,16 +66,21 @@ Migrations/
  20260512071636_AddDailySummary.Designer.cs
  20260512080911_SummaryTypes.cs
  20260512080911_SummaryTypes.Designer.cs
+ 20260517160840_AddUsers.cs
+ 20260517160840_AddUsers.Designer.cs
  AppDbContextModelSnapshot.cs
 Models/
  Note.cs
  Summary.cs
+ User.cs
 obj/Debug/net8.0/
  .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
  RecallAI.API.AssemblyInfo.cs
  RecallAI.API.GlobalUsings.g.cs
 Program.cs
-Services/AiService.cs
+Services/
+ AiService.cs
+ TokenService.cs
 
 [metadataReferences]
 <DOTNET>/packs/Microsoft.AspNetCore.App.Ref/8.0.13/ref/net8.0/
@@ -389,12 +395,12 @@ Services/AiService.cs
  microsoft.entityframeworkcore.sqlite.core/8.0.7/lib/net8.0/Microsoft.EntityFrameworkCore.Sqlite.dll
  microsoft.entityframeworkcore/8.0.7/lib/net8.0/Microsoft.EntityFrameworkCore.dll
  microsoft.extensions.dependencymodel/8.0.1/lib/net8.0/Microsoft.Extensions.DependencyModel.dll
- microsoft.identitymodel.abstractions/7.1.2/lib/net8.0/Microsoft.IdentityModel.Abstractions.dll
- microsoft.identitymodel.jsonwebtokens/7.1.2/lib/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll
- microsoft.identitymodel.logging/7.1.2/lib/net8.0/Microsoft.IdentityModel.Logging.dll
+ microsoft.identitymodel.abstractions/8.18.0/lib/net8.0/Microsoft.IdentityModel.Abstractions.dll
+ microsoft.identitymodel.jsonwebtokens/8.18.0/lib/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll
+ microsoft.identitymodel.logging/8.18.0/lib/net8.0/Microsoft.IdentityModel.Logging.dll
  microsoft.identitymodel.protocols.openidconnect/7.1.2/lib/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
  microsoft.identitymodel.protocols/7.1.2/lib/net8.0/Microsoft.IdentityModel.Protocols.dll
- microsoft.identitymodel.tokens/7.1.2/lib/net8.0/Microsoft.IdentityModel.Tokens.dll
+ microsoft.identitymodel.tokens/8.18.0/lib/net8.0/Microsoft.IdentityModel.Tokens.dll
  microsoft.openapi/1.6.14/lib/netstandard2.0/Microsoft.OpenApi.dll
  sqlitepclraw.bundle_e_sqlite3/2.1.6/lib/netstandard2.0/SQLitePCLRaw.batteries_v2.dll
  sqlitepclraw.core/2.1.6/lib/netstandard2.0/SQLitePCLRaw.core.dll
@@ -402,7 +408,7 @@ Services/AiService.cs
  swashbuckle.aspnetcore.swagger/6.6.2/lib/net8.0/Swashbuckle.AspNetCore.Swagger.dll
  swashbuckle.aspnetcore.swaggergen/6.6.2/lib/net8.0/Swashbuckle.AspNetCore.SwaggerGen.dll
  swashbuckle.aspnetcore.swaggerui/6.6.2/lib/net8.0/Swashbuckle.AspNetCore.SwaggerUI.dll
- system.identitymodel.tokens.jwt/7.1.2/lib/net8.0/System.IdentityModel.Tokens.Jwt.dll
+ system.identitymodel.tokens.jwt/8.18.0/lib/net8.0/System.IdentityModel.Tokens.Jwt.dll
 
 [analyzerReferences]
 <DOTNET>/packs/Microsoft.AspNetCore.App.Ref/8.0.13/analyzers/dotnet/cs/

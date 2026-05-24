@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Trash2 } from "lucide-react";
 import API_BASE_URL from "@/lib/api";
+import { useSession } from "next-auth/react";
 
 export default function NoteEditor({ activeNoteId }: any) {
   const [note, setNote] = useState<any>(null);
   const saveTimeout = useRef<any>(null);
+  const { data: session } = useSession();
 
   // LOAD NOTE
   useEffect(() => {
@@ -26,7 +28,17 @@ export default function NoteEditor({ activeNoteId }: any) {
     }
 
     async function load() {
-      const res = await fetch(`${API_BASE_URL}/api/Notes`);
+      const res = await fetch(`${API_BASE_URL}/api/Notes`, {
+        headers: {
+          Authorization: `Bearer ${session?.user?.token}`,
+        },
+      });
+
+      if (!res.ok) {
+        console.log("Failed to fetch notes", await res.text());
+        return;
+      }
+
       const data = await res.json();
 
       const found = data.find((n: any) => n.id === activeNoteId);
@@ -54,6 +66,7 @@ export default function NoteEditor({ activeNoteId }: any) {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.user?.token}`,
             },
             body: JSON.stringify({
               title: note.title || "Untitled",
@@ -61,8 +74,12 @@ export default function NoteEditor({ activeNoteId }: any) {
             }),
           });
 
-          const created = await res.json();
+          if (!res.ok) {
+            console.error("Create note failed", await res.text());
+            return;
+          }
 
+          const created = await res.json();
           setNote((prev: any) => ({
             ...prev,
             isDraft: false,
@@ -79,6 +96,7 @@ export default function NoteEditor({ activeNoteId }: any) {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.user?.token}`,
             },
             body: JSON.stringify({
               title: note.title,

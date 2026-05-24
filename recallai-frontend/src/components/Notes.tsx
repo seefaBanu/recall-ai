@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Pencil, Trash2, Check, X, Plus, Sparkles } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 interface Note {
   id: number;
@@ -14,6 +15,7 @@ export default function Notes() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const { data: session } = useSession();
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -43,7 +45,10 @@ export default function Notes() {
     try {
       await fetch(`${API_BASE_URL}/api/Notes`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.user?.token}`,
+        },
         body: JSON.stringify({ title, content }),
       });
 
@@ -58,6 +63,9 @@ export default function Notes() {
   async function deleteNote(id: number) {
     await fetch(`${API_BASE_URL}/api/Notes/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${session?.user?.token}`,
+      },
     });
 
     fetchNotes();
@@ -75,9 +83,12 @@ export default function Notes() {
     setLoading(true);
 
     try {
-      await fetch(`http://localhost:5285/api/Notes/${id}`, {
+      await fetch(`${API_BASE_URL}/api/Notes/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.user?.token}`,
+        },
         body: JSON.stringify({
           title: editTitle,
           content: editContent,

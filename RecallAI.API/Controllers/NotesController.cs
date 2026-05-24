@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RecallAI.API.Data;
 using RecallAI.API.Models;
+using System.Security.Claims;
 
 namespace RecallAI.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class NotesController : ControllerBase
@@ -15,36 +18,117 @@ public class NotesController : ControllerBase
         _context = context;
     }
 
+    // =========================
+    // GET USER ID FROM JWT
+    // =========================
+    private string GetUserId()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            throw new UnauthorizedAccessException("Unauthorized");
+        }
+
+        return userId;
+    }
+
+    // =========================
+    // GET ALL NOTES
+    // =========================
     [HttpGet]
     public IActionResult GetNotes()
     {
-        return Ok(_context.Notes.ToList());
+        var userId = GetUserId();
+
+        var notes = _context.Notes
+            .Where(n => n.UserId == userId)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToList();
+
+        return Ok(notes);
     }
 
+    // =========================
+    // GET SINGLE NOTE
+    // =========================
+    [HttpGet("{id}")]
+    public IActionResult GetNote(int id)
+    {
+        var userId = GetUserId();
+
+        var note = _context.Notes
+            .FirstOrDefault(n =>
+                n.Id == id &&
+                n.UserId == userId
+            );
+
+        if (note == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(note);
+    }
+
+    // =========================
+    // CREATE NOTE
+    // =========================
     [HttpPost]
     public async Task<IActionResult> Create(Note note)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        var userId = GetUserId();
 
-        if (string.IsNullOrWhiteSpace(note.Title) ||
-            string.IsNullOrWhiteSpace(note.Content))
-        {
-            return BadRequest("Title and Content are required");
-        }
+        note.UserId = userId;
+        note.CreatedAt = DateTime.UtcNow;
 
         _context.Notes.Add(note);
+
         await _context.SaveChangesAsync();
 
         return Ok(note);
     }
 
-    [HttpDelete("{id}")]
-    public IActionResult DeleteNote(int id)
+    // =========================
+    // UPDATE NOTE
+    // =========================
+    [HttpPut("{id}")]
+    public IActionResult Update(int id, Note updated)
     {
-        var note = _context.Notes.Find(id);
+        var userId = GetUserId();
+
+        var note = _context.Notes
+            .FirstOrDefault(n =>
+                n.Id == id &&
+                n.UserId == userId
+            );
+
+        if (note == null)
+        {
+            return NotFound();
+        }
+
+        note.Title = updated.Title;
+        note.Content = updated.Content;
+
+        _context.SaveChanges();
+
+        return Ok(note);
+    }
+
+    // =========================
+    // DELETE NOTE
+    // =========================
+    [HttpDelete("{id}")]
+    public IActionResult Delete(int id)
+    {
+        var userId = GetUserId();
+
+        var note = _context.Notes
+            .FirstOrDefault(n =>
+                n.Id == id &&
+                n.UserId == userId
+            );
 
         if (note == null)
         {
@@ -56,23 +140,5 @@ public class NotesController : ControllerBase
         _context.SaveChanges();
 
         return NoContent();
-    }
-
-    [HttpPut("{id}")]
-    public IActionResult UpdateNote(int id, Note updatedNote)
-    {
-        var note = _context.Notes.Find(id);
-
-        if (note == null)
-        {
-            return NotFound();
-        }
-
-        note.Title = updatedNote.Title;
-        note.Content = updatedNote.Content;
-
-        _context.SaveChanges();
-
-        return Ok(note);
     }
 }
