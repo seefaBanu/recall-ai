@@ -8,7 +8,8 @@ export default function useAuth() {
   return {
     session,
     status,
-    token: session?.user?.token || null,
+    loading: status === "loading",
+    token: session?.accessToken|| null,
     user: session?.user || null,
     isAuthenticated: !!session,
   };

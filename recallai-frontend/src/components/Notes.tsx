@@ -47,7 +47,7 @@ export default function Notes() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user?.token}`,
+          Authorization: `Bearer ${session?.accessToken}`,
         },
         body: JSON.stringify({ title, content }),
       });
@@ -64,7 +64,7 @@ export default function Notes() {
     await fetch(`${API_BASE_URL}/api/Notes/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${session?.user?.token}`,
+        Authorization: `Bearer ${session?.accessToken}`,
       },
     });
 
@@ -87,7 +87,7 @@ export default function Notes() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user?.token}`,
+          Authorization: `Bearer ${session?.accessToken}`,
         },
         body: JSON.stringify({
           title: editTitle,

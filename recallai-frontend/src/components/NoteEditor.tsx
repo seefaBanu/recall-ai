@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Trash2 } from "lucide-react";
 import API_BASE_URL from "@/lib/api";
 import { useSession } from "next-auth/react";
+import NextAuth from "next-auth";
 
 export default function NoteEditor({ activeNoteId }: any) {
   const [note, setNote] = useState<any>(null);
@@ -30,7 +31,7 @@ export default function NoteEditor({ activeNoteId }: any) {
     async function load() {
       const res = await fetch(`${API_BASE_URL}/api/Notes`, {
         headers: {
-          Authorization: `Bearer ${session?.user?.token}`,
+          Authorization: `Bearer ${session?.accessToken}`,
         },
       });
 
@@ -66,7 +67,7 @@ export default function NoteEditor({ activeNoteId }: any) {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.user?.token}`,
+              Authorization: `Bearer ${session?.accessToken}`,
             },
             body: JSON.stringify({
               title: note.title || "Untitled",
@@ -96,7 +97,7 @@ export default function NoteEditor({ activeNoteId }: any) {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.user?.token}`,
+              Authorization: `Bearer ${session?.accessToken}`,
             },
             body: JSON.stringify({
               title: note.title,
