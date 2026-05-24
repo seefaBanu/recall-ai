@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import API_BASE_URL from "@/lib/api";
 
 const handler = NextAuth({
   providers: [
@@ -11,7 +12,7 @@ const handler = NextAuth({
       },
 
       async authorize(credentials) {
-        const res = await fetch("http://localhost:8080/api/Auth/login", {
+      const res = await fetch(`${API_BASE_URL}/api/Auth/login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
