@@ -4,13 +4,17 @@ import { NextResponse } from "next/server";
 export async function middleware(req: any) {
   const token = await getToken({ req });
 
-  const isLoginPage = req.nextUrl.pathname === "/login";
+  const { pathname } = req.nextUrl;
 
-  if (!token && !isLoginPage) {
+  const publicRoutes = ["/login", "/register"];
+
+  const isPublicRoute = publicRoutes.includes(pathname);
+
+  if (!token && !isPublicRoute) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if (token && isLoginPage) {
+  if (token && isPublicRoute) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
