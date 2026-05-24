@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Layout from "@/components/layout/Layout";
-import NotesList from "@/components/NotesList";
-import NoteEditor from "@/components/NoteEditor";
-import SummaryPanel from "@/components/SummaryPanel";
+import NotesList from "@/components/notes/NotesList";
+import NoteEditor from "@/components/notes/NoteEditor";
+import SummaryPanel from "@/components/ai/SummaryPanel";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -35,7 +35,7 @@ export default function Home() {
     <Layout>
       <div className="h-[calc(100vh-5rem)] grid grid-cols-12 gap-3">
         {/* LEFT */}
-        <div className="col-span-3 border-r pr-2 overflow-y-auto">
+        <div className="col-span-3 border-r border-foreground/10 backdrop-blur-sm pr-2 overflow-y-auto">
           <NotesList
             activeNoteId={activeNoteId}
             setActiveNoteId={setActiveNoteId}
@@ -55,7 +55,7 @@ export default function Home() {
         <div
           className={`overflow-y-auto ${
             aiOpen
-              ? "col-span-3 border-l pl-3"
+              ? "col-span-3 border-l border-foreground/10 backdrop-blur-sm pl-3"
               : "col-span-1 flex justify-center"
           }`}
         >

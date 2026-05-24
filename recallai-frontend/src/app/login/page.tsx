@@ -72,7 +72,7 @@ export default function LoginPage() {
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full h-12 rounded-2xl bg-amber-400 text-white font-semibold"
+            className="w-full h-12 rounded-2xl bg-primary text-primary-foreground hover:bg-primary-600 font-semibold"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
@@ -85,7 +85,7 @@ export default function LoginPage() {
           {/* ✅ FIX: use Link */}
           <Link
             href="/register"
-            className="text-sm font-medium text-amber-600 hover:text-amber-700"
+            className="text-sm font-medium text-primary-600 hover:text-primary-700"
           >
             Create Account
           </Link>

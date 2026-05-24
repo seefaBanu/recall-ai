@@ -25,7 +25,7 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
       <div className="flex justify-center pt-4">
         <button
           onClick={() => setAiOpen(true)}
-          className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-md hover:scale-105 transition"
+          className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center shadow-md hover:scale-105 transition"
         >
           <Sparkles className="w-5 h-5 text-white" />
         </button>
@@ -38,7 +38,7 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
       {/* HEADER */}
       <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-500" />
+          <Sparkles className="w-5 h-5 text-primary-500" />
           <h2 className="font-semibold text-gray-800">AI Summary</h2>
         </div>
 
@@ -56,7 +56,7 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
           onClick={() => handleGenerate("daily")}
           className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
             active === "daily"
-              ? "bg-amber-100 text-amber-700"
+              ? "bg-primary-100 text-primary-700"
               : "bg-white/60 text-gray-600"
           }`}
         >
@@ -68,7 +68,7 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
           onClick={() => handleGenerate("weekly")}
           className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
             active === "weekly"
-              ? "bg-yellow-100 text-yellow-700"
+              ? "bg-primary-100 text-primary-700"
               : "bg-white/60 text-gray-600"
           }`}
         >

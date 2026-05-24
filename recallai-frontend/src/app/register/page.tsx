@@ -46,9 +46,7 @@ export default function RegisterPage() {
   return (
     <div className="h-screen flex items-center justify-center bg-[#FAFAF9]">
       <div className="w-80 space-y-4 bg-white p-6 rounded-2xl shadow">
-        <h1 className="text-xl font-semibold text-center">
-          Create Account
-        </h1>
+        <h1 className="text-xl font-semibold text-center">Create Account</h1>
 
         <input
           className="w-full p-3 border rounded-xl"
@@ -65,18 +63,14 @@ export default function RegisterPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {error && (
-          <p className="text-sm text-red-500 text-center">
-            {error}
-          </p>
-        )}
+        {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
         <button
           onClick={handleRegister}
           disabled={loading}
           className="
             w-full
-            bg-amber-400
+           bg-primary text-primary-foreground hover:bg-primary-600
             p-3
             rounded-xl
             font-medium

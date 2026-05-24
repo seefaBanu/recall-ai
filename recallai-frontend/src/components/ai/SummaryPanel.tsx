@@ -1,35 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
-import API_BASE_URL from "@/lib/api";
+import {
+  Sparkles,
+  CalendarDays,
+  CalendarRange,
+  Calendar,
+  X,
+} from "lucide-react";
 
-export default function SummaryPanel() {
-  const [open, setOpen] = useState(false);
-  const [summary, setSummary] = useState<any>({});
+import useSummary from "@/hooks/useSummary";
+
+export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
+  const { summary, loading, generate } = useSummary();
   const [active, setActive] = useState("daily");
 
-  async function generate(type: string) {
+  function handleGenerate(type: string) {
     setActive(type);
-
-    const res = await fetch(`${API_BASE_URL}/api/Summary/${type}`, {
-      method: "POST",
-    });
-
-    const data = await res.text();
-
-    setSummary((prev: any) => ({
-      ...prev,
-      [type]: data,
-    }));
+    generate(type);
   }
 
-  if (!open) {
+  if (!aiOpen) {
     return (
-      <div className="flex justify-end p-3">
+      <div className="flex justify-center pt-4">
         <button
-          onClick={() => setOpen(true)}
-          className="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center"
+          onClick={() => setAiOpen(true)}
+          className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center shadow-md hover:scale-105 transition"
         >
           <Sparkles className="w-5 h-5 text-white" />
         </button>
@@ -38,28 +34,76 @@ export default function SummaryPanel() {
   }
 
   return (
-    <div className="p-3 h-full flex flex-col">
-      <div className="flex justify-between mb-3">
-        <p className="font-semibold">AI Summary</p>
-        <button onClick={() => setOpen(false)}>✕</button>
+    <div className="h-full flex flex-col bg-white/40 backdrop-blur-xl rounded-2xl p-3">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-4 px-1">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-primary-500" />
+          <h2 className="font-semibold text-gray-800">AI Summary</h2>
+        </div>
+
+        <button
+          onClick={() => setAiOpen(false)}
+          className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
 
-      <div className="flex gap-2 mb-3">
-        {["daily", "weekly", "monthly"].map((t) => (
-          <button
-            key={t}
-            onClick={() => generate(t)}
-            className={`px-2 py-1 text-xs rounded-lg ${
-              active === t ? "bg-amber-100" : "bg-gray-100"
-            }`}
-          >
-            {t}
-          </button>
-        ))}
+      {/* BUTTONS */}
+      <div className="flex flex-col gap-2 mb-4 px-1">
+        <button
+          onClick={() => handleGenerate("daily")}
+          className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
+            active === "daily"
+              ? "bg-primary-100 text-primary-700"
+              : "bg-white/60 text-gray-600"
+          }`}
+        >
+          <CalendarDays className="w-4 h-4" />
+          Daily Summary
+        </button>
+
+        <button
+          onClick={() => handleGenerate("weekly")}
+          className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
+            active === "weekly"
+              ? "bg-primary-100 text-primary-700"
+              : "bg-white/60 text-gray-600"
+          }`}
+        >
+          <CalendarRange className="w-4 h-4" />
+          Weekly Summary
+        </button>
+
+        <button
+          onClick={() => handleGenerate("monthly")}
+          className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
+            active === "monthly"
+              ? "bg-orange-100 text-orange-700"
+              : "bg-white/60 text-gray-600"
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          Monthly Summary
+        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto text-sm text-gray-700">
-        {summary[active] || "Generate a summary"}
+      {/* OUTPUT */}
+      <div className="flex-1 overflow-y-auto px-1">
+        {loading ? (
+          <div className="flex justify-center py-10 text-xs text-gray-400">
+            Generating insights...
+          </div>
+        ) : summary[active] ? (
+          <p className="text-sm text-gray-700 whitespace-pre-line">
+            {summary[active]}
+          </p>
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-10">
+            No insights yet
+          </p>
+        )}
       </div>
     </div>
   );
