@@ -70,7 +70,7 @@ RecallAI automatically analyzes your notes and generates:
 - **Styling:** Tailwind CSS
 - **Auth:** NextAuth.js
 - **Icons:** Lucide React
-- **Backend:** REST API (`API_BASE_URL`)
+- **Backend:** .NET
 - **AI Layer:** Summary generation service (groq)
 
 ---
