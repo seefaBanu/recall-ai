@@ -14,16 +14,26 @@ public class AiController : ControllerBase
         _aiService = aiService;
     }
 
+    // =========================
+    // GET USER ID FROM HEADER
+    // =========================
     private string GetUserId()
     {
         return Request.Headers["x-user-id"].ToString();
     }
 
+    // =========================
+    // DTO
+    // =========================
     public class AiRequest
     {
-        public string Text { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Content { get; set; } = "";
     }
 
+    // =========================
+    // SINGLE NOTE SUMMARY (FIXED)
+    // =========================
     [HttpPost("summary")]
     public async Task<IActionResult> GetSummary([FromBody] AiRequest request)
     {
@@ -32,10 +42,16 @@ public class AiController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized("Missing user id");
 
-        var result = await _aiService.GenerateSummary(
-            "daily",
-            new List<string> { request.Text }
-        );
+        var notes = new List<NoteDto>
+        {
+            new NoteDto
+            {
+                Title = request.Title,
+                Content = request.Content
+            }
+        };
+
+        var result = await _aiService.GenerateSummary("daily", notes);
 
         return Ok(result);
     }

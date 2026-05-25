@@ -69,15 +69,22 @@ public class AiService
     // =========================
     // GENERAL SUMMARY
     // =========================
-    public async Task<string> GenerateSummary(string type, List<string> notes)
+    public async Task<string> GenerateSummary(string type, List<NoteDto> notes)
     {
-        var combined = string.Join("\n", notes);
+        var combined = string.Join("\n\n", notes.Select(n =>
+            $@"Title: {n.Title}
+            Content: {n.Content}"
+                    ));
 
         var prompt = $@"
             You are an AI note summarizer.
 
             TASK:
             Create a VERY SHORT summary of the user's notes.
+
+            IMPORTANT:
+            - Titles are important context
+            - Always consider title + content together
 
             RULES:
             - Maximum 4–6 lines total
@@ -103,32 +110,38 @@ public class AiService
     // =========================
     // DAILY SUMMARY
     // =========================
-    public async Task<string> GenerateDailySummary(List<string> notes)
+    public async Task<string> GenerateDailySummary(List<NoteDto> notes)
     {
         var trimmedNotes = notes.TakeLast(15);
-        var combined = string.Join("\n", trimmedNotes);
+
+        var combined = string.Join("\n\n", trimmedNotes.Select(n =>
+            $@"Title: {n.Title}
+    Content: {n.Content}"
+        ));
 
         var prompt = $@"
-            You are an AI productivity assistant.
+    You are an AI productivity assistant.
 
-            TASK:
-            Summarize today's notes in a SHORT and CLEAN format.
+    TASK:
+    Summarize today's notes in a SHORT and CLEAN format.
 
-            RULES:
-            - Max 5 lines total
-            - Keep it extremely simple
-            - No paragraphs longer than 1–2 lines
-            - No technical explanations
-            - No repetition
-            - Focus only on what matters
+    IMPORTANT:
+    - Titles are important context
+    - Use title + content together
 
-            FORMAT:
-            Daily Summary:
-            - 3 to 5 short bullet points MAX
+    RULES:
+    - Max 5 lines total
+    - Keep it extremely simple
+    - No repetition
+    - No long explanations
 
-            NOTES:
-            {combined}
-            ";
+    FORMAT:
+    Daily Summary:
+    - 3 to 5 short bullet points MAX
+
+    NOTES:
+    {combined}
+    ";
 
         return await CallGroq(prompt);
     }
