@@ -21,33 +21,35 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
   }
 
   // =========================
-  // COLLAPSED STATE
+  // FLOATING BUTTON (MOBILE FIX)
   // =========================
   if (!aiOpen) {
     return (
-      <div className="flex justify-center pt-4">
-        <button
-          onClick={() => setAiOpen(true)}
-          className="
-            w-10 h-10 rounded-xl
-            bg-primary
-            flex items-center justify-center
-            shadow-md hover:scale-105 transition
-          "
-        >
-          <Sparkles className="w-5 h-5 text-primary-foreground" />
-        </button>
-      </div>
+      <button
+        onClick={() => setAiOpen(true)}
+        className="
+          fixed md:static
+          bottom-5 right-5 md:bottom-auto md:right-auto
+
+          w-12 h-12 rounded-2xl
+          bg-primary
+          flex items-center justify-center
+          shadow-lg hover:scale-105 transition
+          z-50
+        "
+      >
+        <Sparkles className="w-5 h-5 text-primary-foreground" />
+      </button>
     );
   }
 
   // =========================
-  // EXPANDED STATE
+  // PANEL
   // =========================
   return (
     <div className="h-full flex flex-col bg-background/60 backdrop-blur-xl rounded-2xl p-3 border border-foreground/10">
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-4 px-1">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-primary" />
           <h2 className="font-semibold text-foreground">AI Summary</h2>
@@ -55,20 +57,20 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
 
         <button
           onClick={() => setAiOpen(false)}
-          className="w-8 h-8 rounded-lg bg-background border border-foreground/10 flex items-center justify-center hover:bg-primary/10 transition"
+          className="w-8 h-8 rounded-lg bg-background border flex items-center justify-center"
         >
-          <X className="w-4 h-4 text-foreground" />
+          <X className="w-4 h-4" />
         </button>
       </div>
 
       {/* BUTTONS */}
-      <div className="flex flex-col gap-2 mb-4 px-1">
+      <div className="flex flex-col gap-2 mb-4">
         <button
           onClick={() => handleGenerate("daily")}
-          className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 transition ${
+          className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
             active === "daily"
               ? "bg-primary/20 text-primary"
-              : "bg-background hover:bg-primary/10 text-foreground/70"
+              : "bg-background text-foreground/70"
           }`}
         >
           <CalendarDays className="w-4 h-4" />
@@ -77,10 +79,10 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
 
         <button
           onClick={() => handleGenerate("weekly")}
-          className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 transition ${
+          className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
             active === "weekly"
               ? "bg-primary/20 text-primary"
-              : "bg-background hover:bg-primary/10 text-foreground/70"
+              : "bg-background text-foreground/70"
           }`}
         >
           <CalendarRange className="w-4 h-4" />
@@ -89,10 +91,10 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
 
         <button
           onClick={() => handleGenerate("monthly")}
-          className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 transition ${
+          className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
             active === "monthly"
               ? "bg-primary/20 text-primary"
-              : "bg-background hover:bg-primary/10 text-foreground/70"
+              : "bg-background text-foreground/70"
           }`}
         >
           <Calendar className="w-4 h-4" />
@@ -101,13 +103,13 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
       </div>
 
       {/* OUTPUT */}
-      <div className="flex-1 overflow-y-auto px-1">
+      <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="flex justify-center py-10 text-sm text-foreground/50">
+          <p className="text-sm text-foreground/50 text-center py-10">
             Generating insights...
-          </div>
+          </p>
         ) : summary?.[active] ? (
-          <p className="text-sm text-foreground/80 whitespace-pre-line leading-6">
+          <p className="text-sm text-foreground/80 whitespace-pre-line">
             {summary[active]}
           </p>
         ) : (
