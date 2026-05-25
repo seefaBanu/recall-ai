@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BrainCircuit, Moon, Sun, LogOut, UserCircle2 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 
 export default function Layout({ children }: any) {
   const [dark, setDark] = useState(false);
@@ -26,7 +27,13 @@ export default function Layout({ children }: any) {
             {/* LOGO */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-primary shadow-lg shadow-primary/30 flex items-center justify-center">
-                <BrainCircuit className="w-5 h-5 text-primary-foreground" />
+                <Image
+                  src="/logo2.png"
+                  alt="RecallAI Logo"
+                  width={30}
+                  height={0}
+                  className="object-contain"
+                />{" "}
               </div>
 
               <div>
