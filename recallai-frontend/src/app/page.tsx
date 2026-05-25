@@ -41,17 +41,19 @@ export default function Home() {
       <div className="h-[calc(100vh-5rem)] md:grid md:grid-cols-12 md:gap-3">
         {/* ================= MOBILE VIEW ================= */}
 
-        <div className="md:hidden h-full">
+        <div className="md:hidden h-full relative">
+          {/* NOTES LIST */}
           {mobileView === "list" && (
             <NotesList
               activeNoteId={activeNoteId}
               setActiveNoteId={(id: any) => {
                 setActiveNoteId(id);
-                setMobileView("editor"); // auto navigate
+                setMobileView("editor");
               }}
             />
           )}
 
+          {/* NOTE EDITOR */}
           {mobileView === "editor" && (
             <NoteEditor
               activeNoteId={activeNoteId}
@@ -59,15 +61,22 @@ export default function Home() {
             />
           )}
 
+          {/* SUMMARY PANEL */}
           {mobileView === "summary" && (
             <SummaryPanel
               aiOpen={true}
               setAiOpen={() => setMobileView("list")}
-              onBack={() => setMobileView("list")}
+            />
+          )}
+
+          {/* ALWAYS MOUNT FLOATING BUTTON */}
+          {mobileView !== "summary" && (
+            <SummaryPanel
+              aiOpen={false}
+              setAiOpen={() => setMobileView("summary")}
             />
           )}
         </div>
-
         {/* ================= DESKTOP VIEW ================= */}
         <div className="hidden md:contents">
           {/* LEFT */}
