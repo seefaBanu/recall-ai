@@ -45,13 +45,18 @@ public class SummaryController : ControllerBase
             _ => to.AddDays(-1)
         };
 
+        // 🔥 FIX: Fetch FULL NOTE DATA (NOT ONLY CONTENT)
         var notes = await _context.Notes
             .Where(n =>
                 n.UserId == userId &&
                 n.CreatedAt >= from &&
                 n.CreatedAt <= to
             )
-            .Select(n => n.Content)
+            .Select(n => new NoteDto
+            {
+                Title = n.Title,
+                Content = n.Content
+            })
             .ToListAsync();
 
         if (notes.Count == 0)
