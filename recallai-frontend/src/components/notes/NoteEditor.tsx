@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, ArrowLeft } from "lucide-react";
 import API_BASE_URL from "@/lib/api";
 import { useSession } from "next-auth/react";
-import NextAuth from "next-auth";
 
-export default function NoteEditor({ activeNoteId }: any) {
+export default function NoteEditor({ activeNoteId, onBack }: any) {
   const [note, setNote] = useState<any>(null);
   const saveTimeout = useRef<any>(null);
   const { data: session } = useSession();
 
+  const token = (session as any)?.accessToken;
+
+  // =========================
   // LOAD NOTE
+  // =========================
   useEffect(() => {
     if (!activeNoteId) {
       setNote(null);
@@ -29,36 +32,43 @@ export default function NoteEditor({ activeNoteId }: any) {
     }
 
     async function load() {
-      const res = await fetch(`${API_BASE_URL}/api/Notes`, {
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`,
-        },
-      });
+      if (!token) return;
 
-      if (!res.ok) {
-        console.log("Failed to fetch notes", await res.text());
-        return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/Notes`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          console.log("Failed to fetch notes", await res.text());
+          return;
+        }
+
+        const data = await res.json();
+        const found = data.find((n: any) => n.id === activeNoteId);
+
+        setNote(found || null);
+      } catch (err) {
+        console.error(err);
       }
-
-      const data = await res.json();
-
-      const found = data.find((n: any) => n.id === activeNoteId);
-      setNote(found || null);
     }
 
     load();
-  }, [activeNoteId]);
+  }, [activeNoteId, token]);
 
+  // =========================
   // AUTO SAVE
+  // =========================
   useEffect(() => {
-    if (!note) return;
+    if (!note || !token) return;
 
     clearTimeout(saveTimeout.current);
 
     saveTimeout.current = setTimeout(async () => {
       try {
-        const hasContent = note.title.trim() || note.content.trim();
-
+        const hasContent = note.title?.trim() || note.content?.trim();
         if (!hasContent) return;
 
         // CREATE FIRST TIME
@@ -67,7 +77,7 @@ export default function NoteEditor({ activeNoteId }: any) {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               title: note.title || "Untitled",
@@ -75,12 +85,10 @@ export default function NoteEditor({ activeNoteId }: any) {
             }),
           });
 
-          if (!res.ok) {
-            console.error("Create note failed", await res.text());
-            return;
-          }
+          if (!res.ok) return;
 
           const created = await res.json();
+
           setNote((prev: any) => ({
             ...prev,
             isDraft: false,
@@ -91,13 +99,13 @@ export default function NoteEditor({ activeNoteId }: any) {
           return;
         }
 
-        // UPDATE EXISTING
+        // UPDATE
         if (!note.isDraft && note.id) {
           await fetch(`${API_BASE_URL}/api/Notes/${note.id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               title: note.title,
@@ -111,19 +119,30 @@ export default function NoteEditor({ activeNoteId }: any) {
     }, 800);
 
     return () => clearTimeout(saveTimeout.current);
-  }, [note]);
+  }, [note, token]);
 
+  // =========================
+  // DELETE NOTE
+  // =========================
   async function deleteNote() {
-    if (!note?.id) return;
+    if (!note?.id || !token) return;
 
     await fetch(`${API_BASE_URL}/api/Notes/${note.id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     window.dispatchEvent(new Event("notes-updated"));
     setNote(null);
+
+    if (onBack) onBack();
   }
 
+  // =========================
+  // EMPTY STATE
+  // =========================
   if (!activeNoteId) {
     return (
       <div className="h-full flex items-center justify-center text-gray-400">
@@ -142,8 +161,18 @@ export default function NoteEditor({ activeNoteId }: any) {
 
   return (
     <div className="h-full flex flex-col">
-      {/* TOP */}
-      <div className="flex justify-end mb-4">
+      {/* TOP BAR (MOBILE SAFE) */}
+      <div className="flex items-center justify-between mb-4">
+        {/* BACK BUTTON (mobile only) */}
+        <button
+          onClick={onBack}
+          className="md:hidden flex items-center gap-1 text-sm text-gray-500"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+
+        {/* DELETE */}
         {!note.isDraft && (
           <button
             onClick={deleteNote}
@@ -167,7 +196,7 @@ export default function NoteEditor({ activeNoteId }: any) {
         value={note.content}
         onChange={(e) => setNote({ ...note, content: e.target.value })}
         placeholder="Start writing..."
-        className="flex-1 resize-none outline-none bg-transparent font-light text-text-primary"
+        className="flex-1 resize-none outline-none bg-transparent text-gray-800"
       />
     </div>
   );

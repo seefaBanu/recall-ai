@@ -10,13 +10,18 @@ import NoteEditor from "@/components/notes/NoteEditor";
 import SummaryPanel from "@/components/ai/SummaryPanel";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   const [activeNoteId, setActiveNoteId] = useState<any>(null);
   const [aiOpen, setAiOpen] = useState(false);
 
-  // ✅ SAFE REDIRECT (NO server redirect bug)
+  // 📱 MOBILE VIEW STATE
+  const [mobileView, setMobileView] = useState<"list" | "editor" | "summary">(
+    "list",
+  );
+
+  // AUTH REDIRECT
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
@@ -32,34 +37,66 @@ export default function Home() {
   }
 
   return (
-    <Layout>
-      <div className="h-[calc(100vh-5rem)] grid grid-cols-12 gap-3">
-        {/* LEFT */}
-        <div className="col-span-3 border-r border-foreground/10 backdrop-blur-sm pr-2 overflow-y-auto">
-          <NotesList
-            activeNoteId={activeNoteId}
-            setActiveNoteId={setActiveNoteId}
-          />
+    <Layout mobileView={mobileView} setMobileView={setMobileView}>
+      <div className="h-[calc(100vh-5rem)] md:grid md:grid-cols-12 md:gap-3">
+        {/* ================= MOBILE VIEW ================= */}
+
+        <div className="md:hidden h-full">
+          {mobileView === "list" && (
+            <NotesList
+              activeNoteId={activeNoteId}
+              setActiveNoteId={(id: any) => {
+                setActiveNoteId(id);
+                setMobileView("editor"); // auto navigate
+              }}
+            />
+          )}
+
+          {mobileView === "editor" && (
+            <NoteEditor
+              activeNoteId={activeNoteId}
+              onBack={() => setMobileView("list")}
+            />
+          )}
+
+          {mobileView === "summary" && (
+            <SummaryPanel
+              aiOpen={true}
+              setAiOpen={() => setMobileView("list")}
+              onBack={() => setMobileView("list")}
+            />
+          )}
         </div>
 
-        {/* MIDDLE */}
-        <div
-          className={`overflow-y-auto px-4 ${
-            aiOpen ? "col-span-6" : "col-span-8"
-          }`}
-        >
-          <NoteEditor activeNoteId={activeNoteId} />
-        </div>
+        {/* ================= DESKTOP VIEW ================= */}
+        <div className="hidden md:contents">
+          {/* LEFT */}
+          <div className="col-span-3 border-r border-foreground/10 pr-2 overflow-y-auto">
+            <NotesList
+              activeNoteId={activeNoteId}
+              setActiveNoteId={setActiveNoteId}
+            />
+          </div>
 
-        {/* RIGHT */}
-        <div
-          className={`overflow-y-auto ${
-            aiOpen
-              ? "col-span-3 border-l border-foreground/10 backdrop-blur-sm pl-3"
-              : "col-span-1 flex justify-center"
-          }`}
-        >
-          <SummaryPanel aiOpen={aiOpen} setAiOpen={setAiOpen} />
+          {/* MIDDLE */}
+          <div
+            className={`overflow-y-auto px-4 ${
+              aiOpen ? "col-span-6" : "col-span-8"
+            }`}
+          >
+            <NoteEditor activeNoteId={activeNoteId} />
+          </div>
+
+          {/* RIGHT */}
+          <div
+            className={`overflow-y-auto ${
+              aiOpen
+                ? "col-span-3 border-l border-foreground/10 pl-3"
+                : "col-span-1 flex justify-center"
+            }`}
+          >
+            <SummaryPanel aiOpen={aiOpen} setAiOpen={setAiOpen} />
+          </div>
         </div>
       </div>
     </Layout>

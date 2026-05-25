@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BrainCircuit, Moon, Sun, LogOut, UserCircle2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Moon, Sun, LogOut, UserCircle2 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 
@@ -10,17 +10,38 @@ export default function Layout({ children }: any) {
   const [open, setOpen] = useState(false);
 
   const { data: session, status } = useSession();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // =========================
+  // THEME TOGGLE
+  // =========================
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
+
+  // =========================
+  // CLOSE DROPDOWN OUTSIDE CLICK
+  // =========================
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors">
       {/* TOP BAR */}
       <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/10">
         <div className="relative">
-          {/* Teal glow background layer */}
+          {/* Glow */}
           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent dark:from-primary/10 dark:via-primary/5 dark:to-transparent" />
 
           <div className="relative max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -31,12 +52,12 @@ export default function Layout({ children }: any) {
                   src="/logo2.png"
                   alt="RecallAI Logo"
                   width={30}
-                  height={0}
+                  height={30}
                   className="object-contain"
-                />{" "}
+                />
               </div>
 
-              <div>
+              <div className="leading-tight">
                 <h1 className="font-semibold text-foreground">RecallAI</h1>
                 <p className="text-xs text-foreground/60">Workspace</p>
               </div>
@@ -46,7 +67,7 @@ export default function Layout({ children }: any) {
             <div className="flex items-center gap-3">
               {/* THEME TOGGLE */}
               <button
-                onClick={() => setDark(!dark)}
+                onClick={() => setDark((v) => !v)}
                 className="w-10 h-10 rounded-xl bg-background/60 border border-white/10 backdrop-blur-md flex items-center justify-center hover:bg-primary/10 transition"
               >
                 {dark ? (
@@ -58,13 +79,13 @@ export default function Layout({ children }: any) {
 
               {/* USER MENU */}
               {status === "loading" ? null : session?.user ? (
-                <div className="relative">
+                <div ref={dropdownRef} className="relative">
                   <button
-                    onClick={() => setOpen(!open)}
+                    onClick={() => setOpen((v) => !v)}
                     className="flex items-center gap-2 px-3 py-2 rounded-xl bg-background/60 border border-white/10 backdrop-blur-md hover:bg-primary/10 transition"
                   >
                     <UserCircle2 className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-foreground">
+                    <span className="text-sm text-foreground max-w-[120px] truncate">
                       {session.user.email}
                     </span>
                   </button>
