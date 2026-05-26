@@ -31,7 +31,7 @@ export default function LoginPage() {
     const res = await signIn("credentials", {
       email,
       password,
-      callbackUrl: "/",
+      callbackUrl: "/workspace",
       redirect: false,
     });
 
@@ -42,7 +42,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/workspace");
   }
 
   return (
