@@ -45,12 +45,6 @@ export default function LoginPage() {
     router.push("/");
   }
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/");
-    }
-  }, [status, router]);
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-background flex items-center justify-center px-4 py-6">
       {/* ================= BACKGROUND ================= */}
