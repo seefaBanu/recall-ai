@@ -6,9 +6,12 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Sparkles, BrainCircuit, ShieldCheck } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { status } = useSession();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,6 +44,12 @@ export default function LoginPage() {
 
     router.push("/");
   }
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background flex items-center justify-center px-4 py-6">
