@@ -5,10 +5,7 @@ import { Plus } from "lucide-react";
 import API_BASE_URL from "@/lib/api";
 import { useSession } from "next-auth/react";
 
-export default function NotesList({
-  activeNoteId,
-  setActiveNoteId,
-}: any) {
+export default function NotesList({ activeNoteId, setActiveNoteId }: any) {
   const { data: session, status } = useSession();
   const [notes, setNotes] = useState<any[]>([]);
 
@@ -43,8 +40,7 @@ export default function NotesList({
 
       const sorted = data.sort(
         (a: any, b: any) =>
-          new Date(b.createdAt).getTime() -
-          new Date(a.createdAt).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
 
       setNotes(sorted);
@@ -67,8 +63,7 @@ export default function NotesList({
     const handler = () => fetchNotes();
     window.addEventListener("notes-updated", handler);
 
-    return () =>
-      window.removeEventListener("notes-updated", handler);
+    return () => window.removeEventListener("notes-updated", handler);
   }, [token]);
 
   // =========================
@@ -92,8 +87,7 @@ export default function NotesList({
       const created = new Date(note.createdAt);
 
       const diffDays =
-        (now.getTime() - created.getTime()) /
-        (1000 * 60 * 60 * 24);
+        (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
 
       if (diffDays < 1) {
         today.push(note);
@@ -149,46 +143,71 @@ export default function NotesList({
           <p className="text-xs text-foreground/50">Workspace</p>
         </div>
 
-        {/* NEW NOTE */}
         <button
           onClick={createNote}
-          className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition"
+          className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center"
         >
           <Plus className="w-5 h-5" />
         </button>
       </div>
 
-      {/* LIST */}
-      <div className="flex-1 overflow-y-auto pr-2">
-        {groupedNotes.today.length > 0 && (
-          <section className="mb-5">
-            <h3 className="text-xs text-foreground/50 mb-2">
-              Today
-            </h3>
-            {renderNotes(groupedNotes.today)}
-          </section>
-        )}
+      {/* =========================
+        SKELETON LOADING
+    ========================= */}
+      {status === "loading" && (
+        <div className="space-y-3 pr-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className="p-3 rounded-2xl border border-white/10 bg-white/5 animate-pulse"
+            >
+              <div className="h-3 w-2/3 bg-gray-300/30 rounded mb-2" />
+              <div className="h-2 w-full bg-gray-300/20 rounded mb-1" />
+              <div className="h-2 w-4/5 bg-gray-300/20 rounded" />
+            </div>
+          ))}
+        </div>
+      )}
 
-        {groupedNotes.last7Days.length > 0 && (
-          <section className="mb-5">
-            <h3 className="text-xs text-foreground/50 mb-2">
-              Previous 7 Days
-            </h3>
-            {renderNotes(groupedNotes.last7Days)}
-          </section>
-        )}
+      {/* =========================
+        EMPTY STATE
+    ========================= */}
+      {status === "authenticated" && notes.length === 0 && (
+        <div className="flex flex-col items-center justify-center h-full text-center text-foreground/40">
+          <p className="text-sm">No notes yet</p>
+          <p className="text-xs">Click + to create your first note</p>
+        </div>
+      )}
 
-        {Object.entries(groupedNotes.monthly).map(
-          ([month, items]) => (
-            <section key={month} className="mb-5">
+      {/* =========================
+        NOTES LIST
+    ========================= */}
+      {status === "authenticated" && notes.length > 0 && (
+        <div className="flex-1 overflow-y-auto pr-2">
+          {groupedNotes.today.length > 0 && (
+            <section className="mb-5">
+              <h3 className="text-xs text-foreground/50 mb-2">Today</h3>
+              {renderNotes(groupedNotes.today)}
+            </section>
+          )}
+
+          {groupedNotes.last7Days.length > 0 && (
+            <section className="mb-5">
               <h3 className="text-xs text-foreground/50 mb-2">
-                {month}
+                Previous 7 Days
               </h3>
+              {renderNotes(groupedNotes.last7Days)}
+            </section>
+          )}
+
+          {Object.entries(groupedNotes.monthly).map(([month, items]) => (
+            <section key={month} className="mb-5">
+              <h3 className="text-xs text-foreground/50 mb-2">{month}</h3>
               {renderNotes(items)}
             </section>
-          )
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

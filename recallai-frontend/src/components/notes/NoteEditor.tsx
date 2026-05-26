@@ -35,16 +35,15 @@ export default function NoteEditor({ activeNoteId, onBack }: any) {
       if (!token) return;
 
       try {
+        setNote(null); // 🔥 triggers skeleton state
+
         const res = await fetch(`${API_BASE_URL}/api/Notes`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        if (!res.ok) {
-          console.log("Failed to fetch notes", await res.text());
-          return;
-        }
+        if (!res.ok) return;
 
         const data = await res.json();
         const found = data.find((n: any) => n.id === activeNoteId);
@@ -71,7 +70,7 @@ export default function NoteEditor({ activeNoteId, onBack }: any) {
         const hasContent = note.title?.trim() || note.content?.trim();
         if (!hasContent) return;
 
-        // CREATE FIRST TIME
+        // CREATE
         if (note.isDraft && note.content.trim()) {
           const res = await fetch(`${API_BASE_URL}/api/Notes`, {
             method: "POST",
@@ -122,7 +121,7 @@ export default function NoteEditor({ activeNoteId, onBack }: any) {
   }, [note, token]);
 
   // =========================
-  // DELETE NOTE
+  // DELETE
   // =========================
   async function deleteNote() {
     if (!note?.id || !token) return;
@@ -145,28 +144,39 @@ export default function NoteEditor({ activeNoteId, onBack }: any) {
   // =========================
   if (!activeNoteId) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-400">
+      <div className="h-full flex items-center justify-center text-foreground/40">
         Select a note
       </div>
     );
   }
 
-  if (!note) {
+  // =========================
+  // SKELETON LOADING (PRO UX)
+  // =========================
+  if (activeNoteId && !note) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-400">
-        Loading...
+      <div className="h-full flex flex-col animate-pulse space-y-4">
+        <div className="h-6 w-24 bg-gray-300/30 rounded" />
+        <div className="h-10 w-2/3 bg-gray-300/20 rounded" />
+        <div className="flex-1 space-y-2">
+          <div className="h-3 w-full bg-gray-300/20 rounded" />
+          <div className="h-3 w-5/6 bg-gray-300/20 rounded" />
+          <div className="h-3 w-4/6 bg-gray-300/20 rounded" />
+        </div>
       </div>
     );
   }
 
+  if (!note) return null;
+
   return (
     <div className="h-full flex flex-col">
-      {/* TOP BAR (MOBILE SAFE) */}
+      {/* TOP BAR */}
       <div className="flex items-center justify-between mb-4">
-        {/* BACK BUTTON (mobile only) */}
+        {/* BACK (mobile only) */}
         <button
           onClick={onBack}
-          className="md:hidden flex items-center gap-1 text-sm text-gray-500"
+          className="md:hidden flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -176,7 +186,7 @@ export default function NoteEditor({ activeNoteId, onBack }: any) {
         {!note.isDraft && (
           <button
             onClick={deleteNote}
-            className="h-10 w-10 rounded-xl bg-red-100 flex items-center justify-center"
+            className="h-10 w-10 rounded-xl bg-red-100 flex items-center justify-center hover:bg-red-200 transition"
           >
             <Trash2 className="w-4 h-4 text-red-600" />
           </button>
@@ -188,7 +198,7 @@ export default function NoteEditor({ activeNoteId, onBack }: any) {
         value={note.title}
         onChange={(e) => setNote({ ...note, title: e.target.value })}
         placeholder="Untitled"
-        className="text-3xl font-bold outline-none bg-transparent mb-4"
+        className="text-3xl font-bold outline-none bg-transparent mb-4 text-foreground placeholder:text-foreground/30"
       />
 
       {/* CONTENT */}
@@ -196,7 +206,7 @@ export default function NoteEditor({ activeNoteId, onBack }: any) {
         value={note.content}
         onChange={(e) => setNote({ ...note, content: e.target.value })}
         placeholder="Start writing..."
-        className="flex-1 resize-none outline-none bg-transparent text-gray-800"
+        className="flex-1 resize-none outline-none bg-transparent text-foreground/80 placeholder:text-foreground/30 leading-6"
       />
     </div>
   );

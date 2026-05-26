@@ -21,17 +21,26 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
   }
 
   // =========================
-  // ALWAYS VISIBLE FLOATING BUTTON
+  // FLOATING BUTTON (FIXED)
   // =========================
   const FloatingButton = (
     <button
       onClick={() => setAiOpen(true)}
       className="
-        fixed bottom-5 right-5 z-[9999]
-        w-12 h-12 rounded-2xl
+        fixed bottom-6 right-6
+        md:bottom-8 md:right-8
+
+        z-[99999]
+
+        w-14 h-14
+        rounded-2xl
+
         bg-primary
         flex items-center justify-center
-        shadow-xl hover:scale-105 transition
+
+        shadow-2xl
+        hover:scale-105 active:scale-95
+        transition
       "
     >
       <Sparkles className="w-5 h-5 text-primary-foreground" />
@@ -50,11 +59,11 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
   // =========================
   return (
     <>
-      {/* keep floating button hidden when open */}
+      {/* keep button mounted but hidden */}
       <div className="hidden">{FloatingButton}</div>
 
       {/* PANEL */}
-      <div className="h-full flex flex-col bg-background/60 backdrop-blur-xl rounded-2xl p-3 border border-foreground/10">
+      <div className="h-full flex flex-col bg-background/70 backdrop-blur-xl rounded-2xl p-3 border border-foreground/10">
         {/* HEADER */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -110,11 +119,13 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
         </div>
 
         {/* OUTPUT */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pr-1">
           {loading ? (
-            <p className="text-sm text-foreground/50 text-center py-10">
-              Generating insights...
-            </p>
+            <div className="space-y-2 animate-pulse">
+              <div className="h-3 w-3/4 bg-gray-300/30 rounded" />
+              <div className="h-3 w-2/3 bg-gray-300/20 rounded" />
+              <div className="h-3 w-5/6 bg-gray-300/20 rounded" />
+            </div>
           ) : summary?.[active] ? (
             <p className="text-sm text-foreground/80 whitespace-pre-line leading-6">
               {summary[active]}
