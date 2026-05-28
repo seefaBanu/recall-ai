@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using RecallAI.API.Models;
 
 namespace RecallAI.API.Services;
 
@@ -29,13 +29,11 @@ public class AiService
             model = "openai/gpt-oss-120b",
             messages = new[]
             {
-                new { role = "system", content = "You are a helpful productivity assistant." },
+                new { role = "system", content = "You are RecallAI, an intelligent memory assistant." },
                 new { role = "user", content = prompt }
             },
             temperature = 0.7
         };
-
-        //test
 
         var request = new HttpRequestMessage(
             HttpMethod.Post,
@@ -67,55 +65,44 @@ public class AiService
     }
 
     // =========================
-    // GENERAL SUMMARY
+    // SUMMARY + SEARCH ENGINE
     // =========================
-    public async Task<string> GenerateSummary(string type, List<NoteDto> notes)
+    public async Task<string> GenerateSummary(string type, List<NoteDto> notes, string? query = null)
     {
         var combined = string.Join("\n\n", notes.Select(n =>
-            $@"Title: {n.Title}
-            Content: {n.Content}"
-                    ));
+            $@"TITLE: {n.Title}
+CONTENT: {n.Content}"
+        ));
+
+        string mode = string.IsNullOrWhiteSpace(query)
+            ? "GENERAL SUMMARY"
+            : $"INTENT MODE: {query}";
 
         var prompt = $@"
-You are an intelligent personal memory assistant.
+You are RecallAI, a personal memory intelligence system.
 
 TASK:
-The user writes messy, fragmented, incomplete notes across different days.
+Analyze user notes and return a meaningful response.
 
-Your job is to:
-- understand the REAL intention behind the notes
-- combine related notes together
-- remove duplicates
-- infer missing context when obvious
-- produce ONE clean actionable summary
+MODE:
+{mode}
 
-IMPORTANT:
-- Notes may contain short titles
-- Notes may contain incomplete thoughts
-- Notes may repeat the same idea differently
-- Use BOTH title and content together
-- Group related information naturally
+RULES:
+- If GENERAL SUMMARY → summarize everything
+- If INTENT MODE → extract ONLY relevant information
+- Merge similar ideas
+- Understand real user intent behind notes
+- Ignore unrelated notes when in intent mode
 
-DO NOT:
-- rewrite every note individually
-- repeat the notes back
-- create changelog-style summaries
-- mention unrelated technical tasks unless they connect
+OUTPUT RULES:
+- Plain text only
+- No markdown
+- No bullets unless absolutely needed
+- No formatting symbols
+- Natural human explanation only
 
-INSTEAD:
-Create a smart human-like understanding of what the user actually wants.
-
-OUTPUT STYLE:
-- natural language
-- concise
-- actionable
-- easy to understand quickly
-
-GOOD OUTPUT EXAMPLE:
-'You need to buy/setup office accessories including a mouse and Logitech keyboard, and check additional office items during your next Keells visit.'
-
-TYPE:
-{type}
+EXAMPLE OUTPUT:
+User is planning office setup tasks including buying a mouse and Logitech keyboard, and checking additional items during a Keells visit. They also have app improvements related to usability and crash fixes.
 
 NOTES:
 {combined}
@@ -125,40 +112,39 @@ NOTES:
     }
 
     // =========================
-    // DAILY SUMMARY
+    // SEARCH-ONLY MODE (NEW FEATURE)
     // =========================
-    public async Task<string> GenerateDailySummary(List<NoteDto> notes)
+    public async Task<string> SearchNotes(List<NoteDto> notes, string query)
     {
-        var trimmedNotes = notes.TakeLast(15);
-
-        var combined = string.Join("\n\n", trimmedNotes.Select(n =>
-            $@"Title: {n.Title}
-    Content: {n.Content}"
+        var combined = string.Join("\n\n", notes.Select(n =>
+            $@"TITLE: {n.Title}
+CONTENT: {n.Content}"
         ));
 
         var prompt = $@"
-    You are an AI productivity assistant.
+You are RecallAI Search Engine.
 
-    TASK:
-    Summarize today's notes in a SHORT and CLEAN format.
+TASK:
+User is searching inside their notes.
 
-    IMPORTANT:
-    - Titles are important context
-    - Use title + content together
+QUERY:
+{query}
 
-    RULES:
-    - Max 5 lines total
-    - Keep it extremely simple
-    - No repetition
-    - No long explanations
+RULES:
+- Return ONLY relevant notes
+- Group similar ideas
+- Convert into clean useful summary
+- Ignore unrelated notes completely
 
-    FORMAT:
-    Daily Summary:
-    - 3 to 5 short bullet points MAX
+OUTPUT:
+- Plain text only
+- No markdown
+- No bullets unless needed
+- Very short and precise
 
-    NOTES:
-    {combined}
-    ";
+NOTES:
+{combined}
+";
 
         return await CallGroq(prompt);
     }

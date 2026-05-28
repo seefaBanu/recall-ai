@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecallAI.API.Data;
+using RecallAI.API.Models;
 using RecallAI.API.Services;
 using System.Security.Claims;
 
@@ -26,13 +27,16 @@ public class SummaryController : ControllerBase
         return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 
+    // =========================
+    // SUMMARY + INTENT MODE
+    // =========================
     [HttpPost("{type}")]
-    public async Task<IActionResult> Generate(string type)
+    public async Task<IActionResult> Generate(string type, [FromQuery] string? query)
     {
         var userId = GetUserId();
 
         if (string.IsNullOrEmpty(userId))
-            return Unauthorized("Invalid or missing token");
+            return Unauthorized();
 
         DateTime to = DateTime.UtcNow;
 
@@ -41,11 +45,9 @@ public class SummaryController : ControllerBase
             "daily" => to.AddDays(-1),
             "weekly" => to.AddDays(-7),
             "monthly" => to.AddMonths(-1),
-            "yearly" => to.AddYears(-1),
             _ => to.AddDays(-1)
         };
 
-        // 🔥 FIX: Fetch FULL NOTE DATA (NOT ONLY CONTENT)
         var notes = await _context.Notes
             .Where(n =>
                 n.UserId == userId &&
@@ -54,16 +56,41 @@ public class SummaryController : ControllerBase
             )
             .Select(n => new NoteDto
             {
-                Title = n.Title,
-                Content = n.Content
+                Title = n.Title ?? "",
+                Content = n.Content ?? ""
             })
             .ToListAsync();
 
-        if (notes.Count == 0)
-            return Ok("No notes available for this period.");
+        if (!notes.Any())
+            return Ok("No notes available.");
 
-        var summary = await _ai.GenerateSummary(type, notes);
+        var result = await _ai.GenerateSummary(type, notes, query);
 
-        return Ok(summary);
+        return Ok(result);
+    }
+
+    // =========================
+    // SEARCH ENDPOINT (NEW)
+    // =========================
+    [HttpPost("search")]
+    public async Task<IActionResult> Search([FromBody] string query)
+    {
+        var userId = GetUserId();
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var notes = await _context.Notes
+            .Where(n => n.UserId == userId)
+            .Select(n => new NoteDto
+            {
+                Title = n.Title ?? "",
+                Content = n.Content ?? ""
+            })
+            .ToListAsync();
+
+        var result = await _ai.SearchNotes(notes, query);
+
+        return Ok(result);
     }
 }

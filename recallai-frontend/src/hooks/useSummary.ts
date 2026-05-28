@@ -9,13 +9,13 @@ export default function useSummary() {
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<any>({});
 
-  async function generate(type: string) {
+  async function generate(type: string, query?: string) {
     if (!token) return;
 
     setLoading(true);
 
     try {
-      const data = await getSummary(type, token);
+      const data = await getSummary(type, token, query);
 
       setSummary((prev: any) => ({
         ...prev,

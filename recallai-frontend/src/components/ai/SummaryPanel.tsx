@@ -7,21 +7,24 @@ import {
   CalendarRange,
   Calendar,
   X,
+  Search,
 } from "lucide-react";
 
 import useSummary from "@/hooks/useSummary";
 
 export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
   const { summary, loading, generate } = useSummary();
-  const [active, setActive] = useState("daily");
 
-  function handleGenerate(type: string) {
+  const [active, setActive] = useState("daily");
+  const [query, setQuery] = useState("");
+
+  function handleGenerate(type: string, customQuery?: string) {
     setActive(type);
-    generate(type);
+    generate(type, customQuery);
   }
 
   // =========================
-  // FLOATING BUTTON (FIXED)
+  // FLOATING BUTTON
   // =========================
   const FloatingButton = (
     <button
@@ -29,15 +32,11 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
       className="
         fixed bottom-6 right-6
         md:bottom-8 md:right-8
-
         z-[99999]
-
         w-14 h-14
         rounded-2xl
-
         bg-primary
         flex items-center justify-center
-
         shadow-2xl
         hover:scale-105 active:scale-95
         transition
@@ -47,28 +46,19 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
     </button>
   );
 
-  // =========================
-  // CLOSED STATE
-  // =========================
-  if (!aiOpen) {
-    return FloatingButton;
-  }
+  if (!aiOpen) return FloatingButton;
 
-  // =========================
-  // OPEN STATE
-  // =========================
   return (
     <>
-      {/* keep button mounted but hidden */}
       <div className="hidden">{FloatingButton}</div>
 
       {/* PANEL */}
       <div className="h-full flex flex-col bg-background/70 backdrop-blur-xl rounded-2xl p-3 border border-foreground/10">
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            <h2 className="font-semibold text-foreground">AI Summary</h2>
+            <h2 className="font-semibold text-foreground">AI Memory</h2>
           </div>
 
           <button
@@ -79,11 +69,37 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
           </button>
         </div>
 
-        {/* BUTTONS */}
-        <div className="flex flex-col gap-2 mb-4">
+        {/* 🔎 SEARCH BAR (NEW) */}
+        <div className="flex gap-2 mb-3">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search: shopping, movies, work..."
+            className="
+              flex-1 px-3 py-2 rounded-xl
+              bg-background/60 border border-foreground/10
+              text-sm outline-none
+              focus:border-primary/40
+            "
+          />
+
+          <button
+            onClick={() => handleGenerate(active, query)}
+            className="
+              px-3 py-2 rounded-xl
+              bg-primary text-primary-foreground
+              flex items-center gap-1
+            "
+          >
+            <Search className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* MODE BUTTONS */}
+        <div className="flex flex-col gap-2 mb-3">
           <button
             onClick={() => handleGenerate("daily")}
-            className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 transition ${
+            className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
               active === "daily"
                 ? "bg-primary/20 text-primary"
                 : "bg-background text-foreground/70"
@@ -95,7 +111,7 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
 
           <button
             onClick={() => handleGenerate("weekly")}
-            className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 transition ${
+            className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
               active === "weekly"
                 ? "bg-primary/20 text-primary"
                 : "bg-background text-foreground/70"
@@ -107,7 +123,7 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
 
           <button
             onClick={() => handleGenerate("monthly")}
-            className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 transition ${
+            className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 ${
               active === "monthly"
                 ? "bg-primary/20 text-primary"
                 : "bg-background text-foreground/70"
@@ -120,6 +136,7 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
 
         {/* OUTPUT */}
         <div className="flex-1 overflow-y-auto pr-1">
+          {/* LOADING */}
           {loading ? (
             <div className="space-y-2 animate-pulse">
               <div className="h-3 w-3/4 bg-gray-300/30 rounded" />
@@ -132,7 +149,7 @@ export default function SummaryPanel({ aiOpen, setAiOpen }: any) {
             </p>
           ) : (
             <p className="text-sm text-foreground/40 text-center py-10">
-              No insights yet
+              Ask something like "shopping", "movies", "work"
             </p>
           )}
         </div>
