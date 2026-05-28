@@ -77,32 +77,49 @@ public class AiService
                     ));
 
         var prompt = $@"
-            You are an AI note summarizer.
+You are an intelligent personal memory assistant.
 
-            TASK:
-            Create a VERY SHORT summary of the user's notes.
+TASK:
+The user writes messy, fragmented, incomplete notes across different days.
 
-            IMPORTANT:
-            - Titles are important context
-            - Always consider title + content together
+Your job is to:
+- understand the REAL intention behind the notes
+- combine related notes together
+- remove duplicates
+- infer missing context when obvious
+- produce ONE clean actionable summary
 
-            RULES:
-            - Maximum 4–6 lines total
-            - Use simple language
-            - No long explanations
-            - No storytelling
-            - No technical deep dive
-            - No bullet points unless absolutely necessary
-            - Focus only on key idea
+IMPORTANT:
+- Notes may contain short titles
+- Notes may contain incomplete thoughts
+- Notes may repeat the same idea differently
+- Use BOTH title and content together
+- Group related information naturally
 
-            FORMAT:
-            - 1 short paragraph OR 3–5 short bullet points max
+DO NOT:
+- rewrite every note individually
+- repeat the notes back
+- create changelog-style summaries
+- mention unrelated technical tasks unless they connect
 
-            TYPE: {type}
+INSTEAD:
+Create a smart human-like understanding of what the user actually wants.
 
-            NOTES:
-            {combined}
-            ";
+OUTPUT STYLE:
+- natural language
+- concise
+- actionable
+- easy to understand quickly
+
+GOOD OUTPUT EXAMPLE:
+'You need to buy/setup office accessories including a mouse and Logitech keyboard, and check additional office items during your next Keells visit.'
+
+TYPE:
+{type}
+
+NOTES:
+{combined}
+";
 
         return await CallGroq(prompt);
     }
